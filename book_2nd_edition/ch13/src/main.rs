@@ -2,7 +2,9 @@ extern crate rand;
 
 use rand::Rng;
 use std::thread;
+use std::collections::HashMap;
 use std::time::Duration;
+use std::collections::hash_map::Entry;
 
 //closure are type of lazy evaluators, similar to lambda in python
 //It can also be used where singleton classes are required!
@@ -16,8 +18,10 @@ fn main() {
 
 struct Catcher<T>
 where T: Fn(u32) -> u32 {
+    // Change to hashmap
     calculation: T,
-    value: Option<u32>
+    //value: Option<u32>
+    value: HashMap<u32, u32>,
 }
 
 impl<T> Catcher<T>
@@ -25,19 +29,40 @@ where T: Fn(u32) -> u32 {
     fn new(calculation: T) -> Catcher<T> {
         Catcher {
             calculation,
-            value: None,
+            value: HashMap::new(),
         }
     }
 
     fn value(&mut self, arg: u32) -> u32 {
-        match self.value {
-            Some(v) => v,
-            None => {
-                let v = (self.calculation)(arg);
-                self.value = Some(v);
-                v
-            }
-        }
+        // IMP NOTE
+        // The issue with borrow checker can be soved by writing
+        // #![feature(nll)] 
+        // at the start(it is a limitation now, in future will be removed)
+        //match self.value {
+        //    Some(v) => v,
+        //    None => {
+        //        let v = (self.calculation)(arg);
+        //        self.value = Some(v);
+        //        v
+        //    }
+        //}
+        //self.value.entry(arg).or_insert((self.calculation)(arg));
+        //self.value.get(&arg).or_else
+
+        //match self.value.get(&arg) {
+        //    Some(v) => *v,
+        //    None => {
+        //        let v = (self.calculation)(arg);
+        //        //self.value.insert(arg, v);
+        //        self.value.entry(arg).or_insert_with(|| v);
+        //        v
+        //    }
+        //}
+        let v = match self.value.entry(arg) {
+            Entry::Occupied(o) => o.into_mut(),
+            Entry::Vacant(v) => v.insert((self.calculation)(arg))
+        };
+        *v
     }
 }
 
