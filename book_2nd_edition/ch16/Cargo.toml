@@ -1,6 +1,4 @@
-[package]
-name = "ch16"
-version = "0.1.0"
-authors = ["Hitesh Paul <paulhitesh.hp@gmail.com>"]
-
-[dependencies]
+[workspace]
+members = [
+	"ch16_1"
+]
