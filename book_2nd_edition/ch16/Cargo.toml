@@ -1,4 +1,6 @@
 [workspace]
 members = [
-	"ch16_1"
+	"ch16_1",
+	"ch16_2",
+	"ch16_3"
 ]
